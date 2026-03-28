@@ -15,15 +15,14 @@ public class EmailProducer {
 
     public EmailProducer(RabbitTemplate rabbitTemplate, Jackson2JsonMessageConverter messageConverter) {
         this.rabbitTemplate = rabbitTemplate;
-
         this.rabbitTemplate.setMessageConverter(messageConverter);
     }
 
-    public void sendEmailMessage(String to, String subject, String body) {
-        EmailDto emailDto = new EmailDto(to, subject, body);
+    public void sendEmailMessage(String to, String subject, String body, String emailType) {
+        EmailDto emailDto = new EmailDto(to, subject, body, emailType);
 
         rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_NAME, emailDto);
 
-        log.info(" [Producer] Mensagem enviada para a fila. Destinatário: {}", to);
+        log.info(" [Producer] Mensagem enviada para a fila. Destinatário: {}, Tipo: {}", to, emailType);
     }
 }
