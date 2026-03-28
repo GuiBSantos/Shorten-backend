@@ -4,6 +4,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+import com.guibsantos.shorterURL.email.EmailProducer;
+import com.guibsantos.shorterURL.security.TokenService;
 import com.guibsantos.shorterURL.controller.dto.request.ChangePasswordRequest;
 import com.guibsantos.shorterURL.controller.dto.response.GoogleLoginResponse;
 import com.guibsantos.shorterURL.entity.Role;

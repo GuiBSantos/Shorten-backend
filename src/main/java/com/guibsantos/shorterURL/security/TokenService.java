@@ -1,4 +1,4 @@
-package com.guibsantos.shorterURL.service;
+package com.guibsantos.shorterURL.security;
 
 import com.guibsantos.shorterURL.entity.UserEntity;
 import io.jsonwebtoken.JwtException;

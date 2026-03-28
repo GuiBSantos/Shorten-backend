@@ -1,4 +1,4 @@
-package com.guibsantos.shorterURL.config.filter;
+package com.guibsantos.shorterURL.security.filter;
 
 import com.guibsantos.shorterURL.service.RateLimitService;
 import io.github.bucket4j.Bucket;

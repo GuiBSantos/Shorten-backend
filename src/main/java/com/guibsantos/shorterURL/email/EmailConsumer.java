@@ -1,4 +1,4 @@
-package com.guibsantos.shorterURL.service;
+package com.guibsantos.shorterURL.email;
 
 import com.guibsantos.shorterURL.config.RabbitMQConfig;
 import com.guibsantos.shorterURL.controller.dto.EmailDto;

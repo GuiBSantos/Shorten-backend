@@ -2,6 +2,7 @@ package com.guibsantos.shorterURL.service;
 
 import com.guibsantos.shorterURL.controller.dto.request.RegisterRequest;
 import com.guibsantos.shorterURL.controller.dto.response.UserResponse;
+import com.guibsantos.shorterURL.email.EmailProducer;
 import com.guibsantos.shorterURL.entity.Role;
 import com.guibsantos.shorterURL.entity.UserEntity;
 import com.guibsantos.shorterURL.repository.UserRepository;

@@ -1,7 +1,7 @@
-package com.guibsantos.shorterURL.config;
+package com.guibsantos.shorterURL.security;
 
-import com.guibsantos.shorterURL.config.filter.RateLimitFilter; // <--- 1. Importar
-import com.guibsantos.shorterURL.config.filter.SecurityFilter;
+import com.guibsantos.shorterURL.security.filter.RateLimitFilter; // <--- 1. Importar
+import com.guibsantos.shorterURL.security.filter.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

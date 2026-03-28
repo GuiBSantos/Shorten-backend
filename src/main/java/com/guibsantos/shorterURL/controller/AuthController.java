@@ -8,7 +8,7 @@ import com.guibsantos.shorterURL.controller.dto.response.UserResponse;
 import com.guibsantos.shorterURL.entity.UserEntity;
 import com.guibsantos.shorterURL.repository.UserRepository;
 import com.guibsantos.shorterURL.service.AuthService;
-import com.guibsantos.shorterURL.service.TokenService;
+import com.guibsantos.shorterURL.security.TokenService;
 import com.guibsantos.shorterURL.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

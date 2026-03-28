@@ -1,7 +1,7 @@
-package com.guibsantos.shorterURL.config.filter;
+package com.guibsantos.shorterURL.security.filter;
 
 import com.guibsantos.shorterURL.repository.UserRepository;
-import com.guibsantos.shorterURL.service.TokenService;
+import com.guibsantos.shorterURL.security.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
