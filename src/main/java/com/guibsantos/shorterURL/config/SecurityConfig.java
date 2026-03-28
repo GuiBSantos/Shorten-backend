@@ -23,7 +23,7 @@ public class SecurityConfig {
     @Autowired
     private SecurityFilter securityFilter;
 
-    @Autowired // <--- 2. Injetar o Filtro de Rate Limit
+    @Autowired
     private RateLimitFilter rateLimitFilter;
 
     @Bean
