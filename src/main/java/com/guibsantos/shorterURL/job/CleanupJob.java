@@ -15,7 +15,7 @@ public class CleanupJob {
 
     private final UrlRepository urlRepository;
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 0 * * *")
     public void cleanup() {
         log.info("Iniciando varredura de URLs expiradas...");
 
