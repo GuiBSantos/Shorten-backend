@@ -1,4 +1,4 @@
-package com.guibsantos.shorterURL.service;
+package com.guibsantos.shorterURL.email;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
@@ -16,7 +16,6 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Properties;
 
@@ -67,15 +66,18 @@ public class GmailApiService {
         if ("WELCOME".equalsIgnoreCase(emailType)) {
             templateName = "welcome";
             context.setVariable("username", body);
+            context.setVariable("type", "WELCOME");
         } else if ("RECOVERY".equalsIgnoreCase(emailType)) {
             templateName = "recuperacao-senha";
             String[] parts = body.split(":", 2);
             context.setVariable("username", parts[0]);
             context.setVariable("code", parts[1]);
+            context.setVariable("type", "RECOVERY");
         } else {
-            templateName = "email-template"; // Um template genérico, se necessário
+            templateName = "email-template";
             context.setVariable("body", body);
             context.setVariable("username", "Usuário");
+            context.setVariable("type", "GENERIC");
         }
 
         String htmlContent = templateEngine.process(templateName, context);

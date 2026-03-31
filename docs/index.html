@@ -319,7 +319,6 @@
             const el = labelEls[i];
             el.style.left = s.x + 'px';
             el.style.top  = (s.y + NODES[i].size + 14) + 'px';
-            // fade based on z
             const zN = (wpos.z + 500) / 1000;
             el.style.opacity = Math.max(0.1, Math.min(0.9, zN));
         });
