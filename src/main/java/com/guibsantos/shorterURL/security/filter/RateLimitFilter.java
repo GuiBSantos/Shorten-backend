@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -34,6 +36,11 @@ public class RateLimitFilter implements Filter {
         String path = httpRequest.getRequestURI();
 
         if ("OPTIONS".equalsIgnoreCase(method) || isBypassPath(path)) {
+            chain.doFilter(request, response);
+            return;
+        }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             chain.doFilter(request, response);
             return;
         }
