@@ -36,12 +36,12 @@ public class TokenService {
                     .getBody()
                     .getSubject();
         } catch (JwtException e) {
-            return "";
+            return null;
         }
     }
 
     private Key getSigninKey() {
-        byte[] keyBytees = Decoders.BASE64.decode(secret);
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }
