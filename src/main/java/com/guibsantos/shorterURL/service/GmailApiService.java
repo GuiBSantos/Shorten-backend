@@ -1,4 +1,4 @@
-package com.guibsantos.shorterURL.email;
+package com.guibsantos.shorterURL.service;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
