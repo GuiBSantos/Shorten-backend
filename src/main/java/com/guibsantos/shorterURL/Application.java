@@ -13,6 +13,11 @@ public class Application {
 		Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 		dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
 
+		System.out.println("POSTGRES_PASSWORD: " + System.getenv("POSTGRES_PASSWORD"));
+		System.out.println("DB_PASSWORD: " + System.getenv("DB_PASSWORD"));
+		System.out.println("DB_USER: " + System.getenv("DB_USER"));
+
+
 		SpringApplication.run(Application.class, args);
 	}
 
