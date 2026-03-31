@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,7 +49,7 @@ public interface UrlControllerDocs {
     })
     @SecurityRequirement(name = "bearer-key")
     ResponseEntity<ShortenUrlResponse> shortenUrl(
-            @RequestBody ShortenUrlRequest request,
+            @RequestBody @Valid ShortenUrlRequest request,
             @Parameter(hidden = true) HttpServletRequest servletRequest
     );
 

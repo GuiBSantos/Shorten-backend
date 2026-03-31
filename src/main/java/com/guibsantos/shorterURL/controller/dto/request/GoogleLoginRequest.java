@@ -1,4 +1,9 @@
 package com.guibsantos.shorterURL.controller.dto.request;
 
-public record GoogleLoginRequest(String token) {
+import jakarta.validation.constraints.NotBlank;
+
+public record GoogleLoginRequest(
+        @NotBlank(message = "O token do Google é obrigatório")
+        String token
+) {
 }

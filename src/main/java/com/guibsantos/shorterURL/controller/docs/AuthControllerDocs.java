@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,7 +32,7 @@ public interface AuthControllerDocs {
     })
     ResponseEntity<String> register(
             @Parameter(description = "JSON contendo username, email e senha", required = true)
-            @RequestBody RegisterRequest request
+            @RequestBody @Valid RegisterRequest request
     );
 
     @Operation(summary = "Realizar Login", description = "Autentica o usuário e retorna um Token JWT.")
@@ -39,7 +40,7 @@ public interface AuthControllerDocs {
             @ApiResponse(responseCode = "200", description = "Login realizado com sucesso"),
             @ApiResponse(responseCode = "403", description = "Usuário ou senha inválidos")
     })
-    ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request);
+    ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request);
 
     @Operation(
             summary = "Login/Registro com Google",
@@ -52,7 +53,7 @@ public interface AuthControllerDocs {
     })
     ResponseEntity<GoogleLoginResponse> googleLogin(
             @Parameter(description = "Token ID retornado pelo SDK do Google no Front-end", required = true)
-            @RequestBody GoogleLoginRequest request
+            @RequestBody @Valid GoogleLoginRequest request
     );
 
     @Operation(summary = "Perfil do Usuário", description = "Retorna os dados do usuário logado (baseado no Token)")
@@ -91,7 +92,7 @@ public interface AuthControllerDocs {
     })
     ResponseEntity<Void> changePassword(
             @Parameter(description = "Objeto contendo a senha atual e a nova senha", required = true)
-            @RequestBody ChangePasswordRequest request
+            @RequestBody @Valid ChangePasswordRequest request
     );
 
 
@@ -106,7 +107,7 @@ public interface AuthControllerDocs {
     })
     ResponseEntity<Void> forgotPassword(
             @Parameter(description = "JSON contendo apenas o e-mail do usuário", required = true)
-            @RequestBody ForgotPasswordRequest request
+            @RequestBody @Valid ForgotPasswordRequest request
     );
 
     @Operation(
@@ -120,7 +121,7 @@ public interface AuthControllerDocs {
     })
     ResponseEntity<Void> resetPassword(
             @Parameter(description = "JSON contendo e-mail, código recebido e nova senha", required = true)
-            @RequestBody ResetPasswordRequest request
+            @RequestBody @Valid ResetPasswordRequest request
     );
 
     @Operation(
@@ -134,7 +135,7 @@ public interface AuthControllerDocs {
     })
     ResponseEntity<Void> validateCode(
             @Parameter(description = "JSON contendo e-mail e o código de 6 dígitos", required = true)
-            @RequestBody ValidateCodeRequest request
+            @RequestBody @Valid ValidateCodeRequest request
     );
 
     @Operation(
@@ -149,7 +150,7 @@ public interface AuthControllerDocs {
     })
     ResponseEntity<Void> updateUsername(
             @Parameter(description = "Novo username desejado", required = true)
-            @RequestBody UpdateUsernameRequest request
+            @RequestBody @Valid UpdateUsernameRequest request
     );
 
     @Operation(
@@ -164,6 +165,6 @@ public interface AuthControllerDocs {
     })
     ResponseEntity<Void> deleteAccount(
             @Parameter(description = "Senha atual para confirmação", required = true)
-            @RequestBody DeleteAccountRequest request
+            @RequestBody @Valid DeleteAccountRequest request
     );
 }

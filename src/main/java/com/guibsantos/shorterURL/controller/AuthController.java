@@ -31,14 +31,14 @@ public class AuthController implements AuthControllerDocs {
 
     @Override
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest request) {
         userService.registerUser(request);
         return ResponseEntity.ok("Usuário registrado com sucesso!");
     }
 
     @Override
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
         try {
             var usernamePassword = new UsernamePasswordAuthenticationToken(request.email(), request.password());
             var auth = authenticationManager.authenticate(usernamePassword);
@@ -60,14 +60,14 @@ public class AuthController implements AuthControllerDocs {
 
     @Override
     @PostMapping("/google")
-    public ResponseEntity<GoogleLoginResponse> googleLogin(@RequestBody GoogleLoginRequest request) {
+    public ResponseEntity<GoogleLoginResponse> googleLogin(@RequestBody @Valid GoogleLoginRequest request) {
         var response = authService.loginWithGoogle(request.token());
         return ResponseEntity.ok(response);
     }
 
     @Override
-    @PostMapping("/change-password")
-    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordRequest request) {
+    @PatchMapping("/change-password")
+    public ResponseEntity<Void> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
         authService.changePassword(request);
         return ResponseEntity.ok().build();
     }
@@ -106,21 +106,21 @@ public class AuthController implements AuthControllerDocs {
 
     @Override
     @PostMapping("/forgot-password")
-    public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+    public ResponseEntity<Void> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
         authService.forgotPassword(request.email());
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @PostMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
+    @PatchMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
         authService.resetPassword(request.email(), request.code(), request.newPassword());
         return ResponseEntity.ok().build();
     }
 
     @Override
     @PostMapping("/validate-code")
-    public ResponseEntity<Void> validateCode(@RequestBody ValidateCodeRequest request) {
+    public ResponseEntity<Void> validateCode(@RequestBody @Valid ValidateCodeRequest request) {
         authService.validateRecoveryCode(request.email(), request.code());
         return ResponseEntity.ok().build();
     }
