@@ -2,6 +2,7 @@ package com.guibsantos.shorterURL.controller;
 
 import com.guibsantos.shorterURL.controller.docs.AuthControllerDocs;
 import com.guibsantos.shorterURL.controller.dto.request.*;
+import com.guibsantos.shorterURL.controller.dto.response.CheckAvailabilityResponse;
 import com.guibsantos.shorterURL.controller.dto.response.GoogleLoginResponse;
 import com.guibsantos.shorterURL.controller.dto.response.LoginResponse;
 import com.guibsantos.shorterURL.controller.dto.response.UserResponse;
@@ -92,16 +93,18 @@ public class AuthController implements AuthControllerDocs {
 
     @Override
     @GetMapping("/check-username/{username}")
-    public ResponseEntity<Boolean> checkUsername(@PathVariable String username) {
+    public ResponseEntity<CheckAvailabilityResponse> checkUsername(@PathVariable String username) {
         boolean exists = userRepository.existsByUsername(username);
-        return ResponseEntity.ok(exists);
+        String message = exists ? "Nome de usuário já está em uso." : "Nome de usuário disponível.";
+        return ResponseEntity.ok(new CheckAvailabilityResponse(!exists, message));
     }
 
     @Override
     @GetMapping("/check-email")
-    public ResponseEntity<Boolean> checkEmail(@RequestParam("value") String email) {
+    public ResponseEntity<CheckAvailabilityResponse> checkEmail(@RequestParam("value") String email) {
         boolean exists = userRepository.existsByEmail(email);
-        return ResponseEntity.ok(exists);
+        String message = exists ? "Este e-mail já está cadastrado." : "E-mail disponível.";
+        return ResponseEntity.ok(new CheckAvailabilityResponse(!exists, message));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.guibsantos.shorterURL.controller.docs;
 
 import com.guibsantos.shorterURL.controller.dto.request.*;
+import com.guibsantos.shorterURL.controller.dto.response.CheckAvailabilityResponse;
 import com.guibsantos.shorterURL.controller.dto.response.GoogleLoginResponse;
 import com.guibsantos.shorterURL.controller.dto.response.LoginResponse;
 import com.guibsantos.shorterURL.controller.dto.response.UserResponse;
@@ -65,16 +66,18 @@ public interface AuthControllerDocs {
     })
     ResponseEntity<UserResponse> getMyProfile();
 
-    @Operation(summary = "Verificar disponibilidade de Usuário", description = "Retorna TRUE se o nome de usuário JÁ EXISTE (indisponível) e FALSE se estiver livre.")
-    @ApiResponse(responseCode = "200", description = "Verificação realizada")
-    ResponseEntity<Boolean> checkUsername(
+    @Operation(summary = "Verificar disponibilidade de Usuário", description = "Retorna se o nome de usuário está disponível para registro.")
+    @ApiResponse(responseCode = "200", description = "Verificação realizada",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CheckAvailabilityResponse.class)))
+    ResponseEntity<CheckAvailabilityResponse> checkUsername(
             @Parameter(description = "O username para verificar", example = "jinx5")
             @PathVariable String username
     );
 
-    @Operation(summary = "Verificar disponibilidade de E-mail", description = "Retorna TRUE se o e-mail JÁ EXISTE (indisponível) e FALSE se estiver livre.")
-    @ApiResponse(responseCode = "200", description = "Verificação realizada")
-    ResponseEntity<Boolean> checkEmail(
+    @Operation(summary = "Verificar disponibilidade de E-mail", description = "Retorna se o e-mail está disponível para registro.")
+    @ApiResponse(responseCode = "200", description = "Verificação realizada",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CheckAvailabilityResponse.class)))
+    ResponseEntity<CheckAvailabilityResponse> checkEmail(
             @Parameter(description = "O e-mail para verificar", example = "teste@email.com")
             @RequestParam("value") String email
     );
