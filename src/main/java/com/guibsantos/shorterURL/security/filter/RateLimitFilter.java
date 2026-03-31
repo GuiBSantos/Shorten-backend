@@ -7,68 +7,64 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Set;
 
 @Component
-@Order(1)
 @RequiredArgsConstructor
 public class RateLimitFilter implements Filter {
 
     private final RateLimitService rateLimitService;
 
+    private static final Set<String> BYPASS_PREFIXES = Set.of(
+            "/swagger", "/v3/api-docs", "/css", "/swagger-ui"
+    );
+
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest httpRequest = (HttpServletRequest)  request;
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        if ("OPTIONS".equalsIgnoreCase(httpRequest.getMethod())) {
-            chain.doFilter(request, response);
-            return;
-        }
-
+        String method = httpRequest.getMethod();
         String path = httpRequest.getRequestURI();
 
-        if(path.startsWith("/swagger") || path.startsWith("v3/api-docs") || path.startsWith("/css")) {
+        if ("OPTIONS".equalsIgnoreCase(method) || isBypassPath(path)) {
             chain.doFilter(request, response);
             return;
         }
 
         String ip = getClientIP(httpRequest);
-
-        boolean isAuthRoute = path.startsWith("/auth") || path.contains("/login") || path.contains("/register");
+        boolean isAuthRoute = path.startsWith("/auth");
 
         Bucket bucket = rateLimitService.resolveBucket(ip, isAuthRoute);
-
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
 
         if (probe.isConsumed()) {
-            httpResponse.addHeader("X-Rate-Limit-Remaining", String.valueOf(probe.getRemainingTokens()));
+            httpResponse.addHeader("X-Rate-Limit-Remaining",
+                    String.valueOf(probe.getRemainingTokens()));
             chain.doFilter(request, response);
         } else {
-
+            long waitSeconds = probe.getNanosToWaitForRefill() / 1_000_000_000;
             httpResponse.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             httpResponse.setContentType("application/json");
-
-            long waitForRefil = probe.getNanosToWaitForRefill() / 1_000_000_000;
-
-            String jsonError = String.format(
-                    "{\"error\": \"Muitas tentativas. Aguarde %d segundos. \"}",
-                    waitForRefil
+            httpResponse.getWriter().write(
+                    String.format("{\"error\": \"Muitas tentativas. Aguarde %d segundos.\"}", waitSeconds)
             );
-
-            httpResponse.getWriter().write(jsonError);
         }
+    }
+
+    private boolean isBypassPath(String path) {
+        return BYPASS_PREFIXES.stream().anyMatch(path::startsWith);
     }
 
     private String getClientIP(HttpServletRequest request) {
         String xfHeader = request.getHeader("X-Forwarded-For");
-        if (xfHeader == null) {
-            return request.getRemoteAddr();
-        }
-        return xfHeader.split(",")[0];
+        if (xfHeader == null || xfHeader.isBlank()) return request.getRemoteAddr();
+        return xfHeader.split(",")[0].trim();
     }
 }
