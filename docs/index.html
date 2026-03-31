@@ -1,337 +1,317 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>shorten-backend · dependency graph</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com"/>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --bg:       #0a0a0f;
-            --surface:  #111118;
-            --border:   rgba(255,255,255,0.07);
-            --text:     #e8e6f0;
-            --muted:    #6b6880;
-            --accent:   #7c6dfa;
-            --accent2:  #fa6d8f;
-        }
-
-        html, body {
-            width: 100%; height: 100%;
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'JetBrains Mono', monospace;
-            overflow: hidden;
-        }
-
-        canvas { display: block; position: fixed; inset: 0; }
-
-        #header {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 10;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 18px 28px;
-            background: linear-gradient(to bottom, rgba(10,10,15,.95) 60%, transparent);
-        }
-        #header h1 {
-            font-family: 'Syne', sans-serif;
-            font-size: 15px; font-weight: 700; letter-spacing: .08em;
-            color: var(--text);
-        }
-        #header h1 span { color: var(--accent); }
-        #header .tag {
-            font-size: 10px; letter-spacing: .12em; color: var(--muted);
-            border: 1px solid var(--border);
-            padding: 3px 8px; border-radius: 4px;
-        }
-
-        #hints {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 20px; z-index: 10;
-            background: rgba(10,10,15,.75); backdrop-filter: blur(10px);
-            border: 1px solid var(--border); border-radius: 30px;
-            padding: 8px 20px;
-        }
-        #hints span { font-size: 10px; color: var(--muted); letter-spacing: .06em; }
-        #hints span b { color: var(--text); font-weight: 500; }
-
-        #tooltip {
-            position: fixed; pointer-events: none;
-            background: rgba(17,17,24,.92); backdrop-filter: blur(12px);
-            border: 1px solid var(--border); border-radius: 10px;
-            padding: 10px 14px; z-index: 20; display: none;
-            min-width: 140px;
-        }
-        #tooltip .name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); }
-        #tooltip .group { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: .08em; }
-        #tooltip .connections { font-size: 10px; color: var(--accent); margin-top: 6px; }
-
-        #legend {
-            position: fixed; right: 24px; top: 50%; transform: translateY(-50%);
-            z-index: 10; display: flex; flex-direction: column; gap: 8px;
-        }
-        .leg-item {
-            display: flex; align-items: center; gap: 8px;
-            font-size: 10px; color: var(--muted); letter-spacing: .06em;
-        }
-        .leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-
-        #labels { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
-        .node-label {
-            position: absolute; transform: translate(-50%, -50%);
-            font-size: 10px; font-weight: 500; letter-spacing: .06em;
-            color: rgba(232,230,240,.7); white-space: nowrap;
-            text-shadow: 0 0 12px rgba(10,10,15,1), 0 0 4px rgba(10,10,15,1);
-            pointer-events: none;
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shorten Backend · Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --bg:#080810; --surface:#10101a; --border:rgba(255,255,255,0.07);
+      --text:#e8e6f0; --muted:#5a5870; --accent:#7c6dfa; --accent2:#fa6d8f;
+    }
+    html,body { width:100%; height:100%; background:var(--bg); color:var(--text); font-family:'JetBrains Mono',monospace; overflow:hidden; }
+    canvas { display:block; position:fixed; inset:0; }
+    #labels { position:fixed; inset:0; pointer-events:none; z-index:5; }
+    .node-label {
+      position:absolute; transform:translate(-50%,-50%);
+      font-size:10px; font-weight:500; letter-spacing:.05em;
+      color:rgba(232,230,240,.8); white-space:nowrap;
+      text-shadow:0 0 10px #080810,0 0 4px #080810; pointer-events:none;
+    }
+    #header {
+      position:fixed; top:0; left:0; right:0; z-index:20;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 28px;
+      background:linear-gradient(to bottom,rgba(8,8,16,.97) 70%,transparent);
+    }
+    #header h1 { font-family:'Syne',sans-serif; font-size:14px; font-weight:800; letter-spacing:.1em; }
+    #header h1 span { color:var(--accent); }
+    .tabs { display:flex; gap:4px; }
+    .tab {
+      font-size:10px; letter-spacing:.08em; padding:5px 14px;
+      border-radius:20px; border:1px solid var(--border);
+      color:var(--muted); cursor:pointer; transition:all .2s; background:transparent; font-family:'JetBrains Mono',monospace;
+    }
+    .tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .tab:hover:not(.active) { color:var(--text); border-color:rgba(255,255,255,.2); }
+    #legend {
+      position:fixed; right:24px; top:50%; transform:translateY(-50%);
+      z-index:10; display:flex; flex-direction:column; gap:8px;
+    }
+    .leg { display:flex; align-items:center; gap:8px; font-size:10px; color:var(--muted); letter-spacing:.05em; }
+    .leg-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    #tooltip {
+      position:fixed; pointer-events:none;
+      background:rgba(10,10,20,.95); backdrop-filter:blur(12px);
+      border:1px solid var(--border); border-radius:10px;
+      padding:10px 14px; z-index:20; display:none; min-width:160px;
+    }
+    .tt-name { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text); }
+    .tt-layer { font-size:10px; color:var(--muted); margin-top:2px; letter-spacing:.08em; }
+    .tt-deps { font-size:10px; color:var(--accent); margin-top:6px; line-height:1.6; }
+    #hints {
+      position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+      display:flex; gap:20px; z-index:10;
+      background:rgba(8,8,16,.8); backdrop-filter:blur(10px);
+      border:1px solid var(--border); border-radius:30px; padding:8px 20px;
+    }
+    #hints span { font-size:10px; color:var(--muted); letter-spacing:.06em; }
+    #hints span b { color:var(--text); font-weight:500; }
+  </style>
 </head>
 <body>
-
 <canvas id="c"></canvas>
 <div id="labels"></div>
-
 <div id="header">
-    <h1><span>shorten</span>-backend</h1>
-    <span class="tag">DEPENDENCY GRAPH · v18.1</span>
+  <h1><span>shorten</span>-backend</h1>
+  <div class="tabs">
+    <button class="tab active" onclick="switchGraph(0)">Services</button>
+    <button class="tab" onclick="switchGraph(1)">Classes</button>
+  </div>
 </div>
-
-<div id="legend">
-    <div class="leg-item"><div class="leg-dot" style="background:#7c6dfa"></div>core / infra</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#6db8fa"></div>client</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#6dfac5"></div>data</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#faa86d"></div>messaging</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#c8c8c8"></div>auth</div>
-</div>
-
-<div id="hints">
-    <span><b>drag</b> to rotate</span>
-    <span><b>scroll</b> to zoom</span>
-    <span><b>hover</b> node for info</span>
-</div>
-
+<div id="legend"></div>
 <div id="tooltip">
-    <div class="name" id="tt-name"></div>
-    <div class="group" id="tt-group"></div>
-    <div class="connections" id="tt-conn"></div>
+  <div class="tt-name" id="tt-name"></div>
+  <div class="tt-layer" id="tt-layer"></div>
+  <div class="tt-deps" id="tt-deps"></div>
 </div>
-
+<div id="hints">
+  <span><b>drag</b> to rotate</span>
+  <span><b>scroll</b> to zoom</span>
+  <span><b>hover</b> for info</span>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-    const NODES = [
-        { id: 'Spring Boot',  group: 'core',      color: 0x7c6dfa, size: 16, desc: 'Java 21 · REST API · core' },
-        { id: 'Frontend',     group: 'client',    color: 0x6db8fa, size: 11, desc: 'Web client · SPA' },
-        { id: 'PostgreSQL',   group: 'data',      color: 0x6dfac5, size: 13, desc: 'Primary database · Flyway' },
-        { id: 'Redis',        group: 'data',      color: 0x6dfac5, size: 12, desc: 'Cache-Aside · TTL' },
-        { id: 'RabbitMQ',     group: 'messaging', color: 0xfaa86d, size: 12, desc: 'Async events · email queue' },
-        { id: 'Google OAuth', group: 'auth',      color: 0xc8c8c8, size: 9,  desc: 'Social login · JWT' },
-        { id: 'Email Svc',    group: 'messaging', color: 0xfaa86d, size: 8,  desc: 'SMTP · Spring Mail' },
-        { id: 'Flyway',       group: 'data',      color: 0x6dfac5, size: 8,  desc: 'DB migrations · versioning' },
-        { id: 'Docker',       group: 'core',      color: 0x7c6dfa, size: 8,  desc: 'Containerization · compose' },
-        { id: 'Terraform',    group: 'core',      color: 0x7c6dfa, size: 8,  desc: 'IaC · AWS EC2' },
-        { id: 'Ansible',      group: 'core',      color: 0x7c6dfa, size: 7,  desc: 'Config management · deploy' },
-        { id: 'Swagger',      group: 'client',    color: 0x6db8fa, size: 7,  desc: 'OpenAPI · docs' },
-    ];
+const GRAPHS = [
+  {
+    legend:[
+      {color:'#7c6dfa',label:'core'},
+      {color:'#6dfac5',label:'data'},
+      {color:'#faa86d',label:'messaging'},
+      {color:'#6db8fa',label:'infra / iac'},
+      {color:'#c8c8c8',label:'auth'},
+    ],
+    nodes:[
+      {id:'Spring Boot',  layer:'core',      color:0x7c6dfa,size:16,desc:'Java 21 · REST API',           deps:'PostgreSQL, Redis, RabbitMQ'},
+      {id:'PostgreSQL',   layer:'data',      color:0x6dfac5,size:13,desc:'Primary DB · Flyway',          deps:'Flyway'},
+      {id:'Redis',        layer:'data',      color:0x6dfac5,size:12,desc:'Cache-Aside · TTL',            deps:''},
+      {id:'RabbitMQ',     layer:'messaging', color:0xfaa86d,size:12,desc:'Async events · queue',         deps:'Email Service'},
+      {id:'Email Svc',    layer:'messaging', color:0xfaa86d,size:9, desc:'SMTP · Spring Mail',           deps:''},
+      {id:'Google OAuth', layer:'auth',      color:0xc8c8c8,size:9, desc:'Social login · JWT',           deps:''},
+      {id:'Flyway',       layer:'data',      color:0x6dfac5,size:8, desc:'DB versioning',                deps:''},
+      {id:'Docker',       layer:'infra',     color:0x6db8fa,size:9, desc:'Containerization · Compose',   deps:'Spring Boot'},
+      {id:'Terraform',    layer:'infra',     color:0x6db8fa,size:9, desc:'IaC · AWS EC2',                deps:'Ansible'},
+      {id:'Ansible',      layer:'infra',     color:0x6db8fa,size:8, desc:'Config · deploy',              deps:'Docker'},
+      {id:'Swagger',      layer:'core',      color:0x7c6dfa,size:7, desc:'OpenAPI · docs',               deps:''},
+      {id:'k6',           layer:'infra',     color:0x6db8fa,size:7, desc:'Load testing',                 deps:'Spring Boot'},
+    ],
+    edges:[[0,1],[0,2],[0,3],[0,5],[0,6],[0,10],[1,6],[3,4],[7,0],[7,1],[7,2],[7,3],[8,9],[9,7],[11,0]],
+    pos:[
+      [0,0,0],[2.5,0.5,0.5],[2,-1.2,1],[-2.5,0.8,0.5],
+      [-3.5,1.8,0],[0.5,2.5,-1],[3.2,0.2,-1],
+      [0,-2.5,0.5],[-1.5,-2.5,-1.5],[-2.8,-1.5,-1],
+      [1.2,2.2,1.5],[2.2,-2,1],
+    ],
+  },
+  {
+    legend:[
+      {color:'#7c6dfa',label:'controller'},
+      {color:'#fa6d8f',label:'service'},
+      {color:'#6dfac5',label:'repository / entity'},
+      {color:'#faa86d',label:'security'},
+      {color:'#6db8fa',label:'config'},
+      {color:'#c8c8c8',label:'dto / model'},
+    ],
+    nodes:[
+      
+      {id:'UrlController',     layer:'controller', color:0x7c6dfa,size:11,desc:'Endpoints de URL',          deps:'UrlService'},
+      {id:'AuthController',    layer:'controller', color:0x7c6dfa,size:11,desc:'Endpoints de auth',         deps:'AuthService'},
+      {id:'UserController',    layer:'controller', color:0x7c6dfa,size:10,desc:'Endpoints de usuário',      deps:'UserService'},
+      
+      {id:'UrlService',        layer:'service',    color:0xfa6d8f,size:14,desc:'Lógica de encurtamento',    deps:'UrlRepository, Redis, RabbitMQ'},
+      {id:'AuthService',       layer:'service',    color:0xfa6d8f,size:14,desc:'Login · OAuth · JWT',       deps:'UserRepository, TokenService'},
+      {id:'UserService',       layer:'service',    color:0xfa6d8f,size:12,desc:'Perfil · senha · upload',   deps:'UserRepository, FileStorageService'},
+      {id:'RateLimitService',  layer:'service',    color:0xfa6d8f,size:9, desc:'Controle de requisições',   deps:'Redis'},
+      {id:'EmailProducer',     layer:'service',    color:0xfa6d8f,size:8, desc:'Publica eventos de email',  deps:'RabbitMQ'},
+      {id:'EmailConsumer',     layer:'service',    color:0xfa6d8f,size:8, desc:'Consome fila de email',     deps:'RabbitMQ'},
+      {id:'FileStorageService',layer:'service',    color:0xfa6d8f,size:8, desc:'Upload foto de perfil',     deps:'UserEntity'},
+      /
+      {id:'UrlRepository',     layer:'repository', color:0x6dfac5,size:10,desc:'JPA · tabela URLs',         deps:'UrlEntity'},
+      {id:'UserRepository',    layer:'repository', color:0x6dfac5,size:10,desc:'JPA · tabela usuários',     deps:'UserEntity'},
+      {id:'UrlEntity',         layer:'repository', color:0x6dfac5,size:9, desc:'Modelo de URL',             deps:''},
+      {id:'UserEntity',        layer:'repository', color:0x6dfac5,size:9, desc:'Modelo de usuário',         deps:'Role'},
+      {id:'Role',              layer:'repository', color:0x6dfac5,size:7, desc:'Enum de permissões',        deps:''},
+      
+      {id:'TokenService',      layer:'security',   color:0xfaa86d,size:10,desc:'Geração e validação JWT',   deps:''},
+      {id:'SecurityFilter',    layer:'security',   color:0xfaa86d,size:9, desc:'Filtro de autenticação',    deps:'TokenService, UserRepository'},
+      {id:'SecurityConfig',    layer:'security',   color:0xfaa86d,size:9, desc:'Config Spring Security',    deps:'SecurityFilter'},
+      {id:'RateLimitFilter',   layer:'security',   color:0xfaa86d,size:8, desc:'Filtro de rate limiting',   deps:'RateLimitService'},
+      
+      {id:'RedisConfig',       layer:'config',     color:0x6db8fa,size:8, desc:'Configuração Redis',        deps:''},
+      {id:'RabbitMQConfig',    layer:'config',     color:0x6db8fa,size:8, desc:'Configuração RabbitMQ',     deps:''},
+      {id:'CleanupJob',        layer:'config',     color:0x6db8fa,size:7, desc:'Limpeza URLs expiradas',    deps:'UrlRepository'},
+    ],
+    edges:[
+      [0,3],[1,4],[2,5],
+      [3,10],[4,11],[5,11],[5,9],
+      [3,19],[3,20],[6,19],[7,20],[8,20],
+      [4,15],[10,12],[11,13],[13,14],
+      [16,15],[16,11],[17,16],[18,6],[21,10],
+    ],
+    pos:[
+      [-2,3.5,0],[0,3.8,0],[2,3.5,0],
+      [-2.5,1,1],[0,1.2,0],[2.5,1,1],
+      [1.5,2,-1],[-1,-0.5,2],[1,-0.5,2],[3.5,0.8,-1],
+      [-2.5,-2,0.5],[2.5,-2,0.5],
+      [-3.5,-3.2,0],[3.5,-3.2,0],[4.5,-3.8,0.5],
+      [-1,1.5,-2],[-2.5,0.2,-2],[-3,1.8,-1.5],[-1.8,-0.5,-2],
+      [1,-1.5,-2],[2,-1.5,-2],[0,-2.8,-1.5],
+    ],
+  },
+];
 
-    const EDGES = [
-        [0,1],[0,2],[0,3],[0,4],[0,5],[0,7],[0,8],[0,11],
-        [4,6],[2,7],[8,9],[9,10],[8,10],
-    ];
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setClearColor(0x000000,0);
 
-    const connCount = new Array(NODES.length).fill(0);
-    EDGES.forEach(([a,b]) => { connCount[a]++; connCount[b]++; });
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50,window.innerWidth/window.innerHeight,0.1,2000);
+camera.position.set(0,0,640);
 
-    const RAW = [
-        [0,    0,    0   ],
-        [-2.2, 0.8,  2   ],
-        [2.5,  1,    0.5 ],
-        [2.2, -1.2,  1   ],
-        [-2.5, 0.8,  0.5 ],
-        [0.5,  2.5, -1   ],
-        [-3,   1.8,  0   ],
-        [3,    0.2, -1   ],
-        [-0.5,-2.5,  0.5 ],
-        [-1.5,-2,   -1.5 ],
-        [-2.8,-1.5, -1   ],
-        [1.2,  2.2,  1.5 ],
-    ];
-    const SCALE = 65;
+scene.add(new THREE.AmbientLight(0xffffff,0.4));
+const dl=new THREE.DirectionalLight(0xffffff,0.8); dl.position.set(200,300,200); scene.add(dl);
+const dl2=new THREE.DirectionalLight(0x7c6dfa,0.3); dl2.position.set(-200,-100,100); scene.add(dl2);
 
-    const canvas = document.getElementById('c');
-    const W = window.innerWidth, H = window.innerHeight;
+const sv=[];
+for(let i=0;i<600;i++) sv.push((Math.random()-.5)*1800,(Math.random()-.5)*1800,(Math.random()-.5)*1800);
+const sg=new THREE.BufferGeometry();
+sg.setAttribute('position',new THREE.Float32BufferAttribute(sv,3));
+scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:.8,transparent:true,opacity:.2})));
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0);
+let group=new THREE.Group(); scene.add(group);
+let meshes=[],labelEls=[];
+const labelsDiv=document.getElementById('labels');
+const SCALE=58;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(50, W/H, 0.1, 2000);
-    camera.position.set(0, 0, 560);
+function clearGraph(){
+  while(group.children.length) group.remove(group.children[0]);
+  labelsDiv.innerHTML=''; labelEls=[]; meshes=[];
+}
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-    const dl1 = new THREE.DirectionalLight(0xffffff, 0.8);
-    dl1.position.set(200, 300, 200); scene.add(dl1);
-    const dl2 = new THREE.DirectionalLight(0x7c6dfa, 0.3);
-    dl2.position.set(-200,-100, 100); scene.add(dl2);
+function buildGraph(gi){
+  clearGraph();
+  const G=GRAPHS[gi];
+  document.getElementById('legend').innerHTML=G.legend.map(l=>
+    `<div class="leg"><div class="leg-dot" style="background:${l.color}"></div>${l.label}</div>`
+  ).join('');
 
-    const group = new THREE.Group();
-    scene.add(group);
+  G.nodes.forEach((n,i)=>{
+    const geo=new THREE.SphereGeometry(n.size,28,28);
+    const mat=new THREE.MeshPhongMaterial({color:n.color,emissive:n.color,emissiveIntensity:.12,shininess:70});
+    const mesh=new THREE.Mesh(geo,mat);
+    mesh.position.set(G.pos[i][0]*SCALE,G.pos[i][1]*SCALE,G.pos[i][2]*SCALE);
+    mesh.userData={...n,index:i};
+    group.add(mesh); meshes.push(mesh);
 
-    const meshes = NODES.map((n, i) => {
-        const geo = new THREE.SphereGeometry(n.size, 32, 32);
-        const mat = new THREE.MeshPhongMaterial({
-            color: n.color, emissive: n.color, emissiveIntensity: 0.15, shininess: 80
-        });
-        const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.set(RAW[i][0]*SCALE, RAW[i][1]*SCALE, RAW[i][2]*SCALE);
-        mesh.userData = { ...n, index: i };
-        group.add(mesh);
-        return mesh;
-    });
+    const hgeo=new THREE.SphereGeometry(n.size*1.8,20,20);
+    const hmat=new THREE.MeshBasicMaterial({color:n.color,transparent:true,opacity:.05,side:THREE.BackSide});
+    const halo=new THREE.Mesh(hgeo,hmat); halo.position.copy(mesh.position); group.add(halo);
 
-    meshes.forEach((m, i) => {
-        const n = NODES[i];
-        const geo = new THREE.SphereGeometry(n.size * 1.9, 24, 24);
-        const mat = new THREE.MeshBasicMaterial({
-            color: n.color, transparent: true, opacity: 0.06, side: THREE.BackSide
-        });
-        const halo = new THREE.Mesh(geo, mat);
-        halo.position.copy(m.position);
-        group.add(halo);
-    });
+    const el=document.createElement('div');
+    el.className='node-label'; el.textContent=n.id;
+    labelsDiv.appendChild(el); labelEls.push(el);
+  });
 
-    EDGES.forEach(([a, b]) => {
-        const pa = meshes[a].position, pb = meshes[b].position;
-        const pts = [pa.clone(), pb.clone()];
-        const geo = new THREE.BufferGeometry().setFromPoints(pts);
-        const mat = new THREE.LineBasicMaterial({
-            color: 0x7c6dfa, transparent: true, opacity: 0.18
-        });
-        group.add(new THREE.Line(geo, mat));
-    });
+  G.edges.forEach(([a,b])=>{
+    const geo=new THREE.BufferGeometry().setFromPoints([meshes[a].position.clone(),meshes[b].position.clone()]);
+    group.add(new THREE.Line(geo,new THREE.LineBasicMaterial({color:0x7c6dfa,transparent:true,opacity:.2})));
+  });
+}
 
-    const starGeo = new THREE.BufferGeometry();
-    const starVerts = [];
-    for (let i = 0; i < 800; i++) {
-        starVerts.push((Math.random()-0.5)*1600, (Math.random()-0.5)*1600, (Math.random()-0.5)*1600);
-    }
-    starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starVerts, 3));
-    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.8, transparent: true, opacity: 0.25 });
-    scene.add(new THREE.Points(starGeo, starMat));
+let dragging=false,lastX=0,lastY=0,rotX=0.15,rotY=0,autoRot=true,curGraph=0;
 
-    const labelsDiv = document.getElementById('labels');
-    const labelEls = NODES.map((n, i) => {
-        const el = document.createElement('div');
-        el.className = 'node-label';
-        el.textContent = n.id;
-        labelsDiv.appendChild(el);
-        return el;
-    });
+canvas.addEventListener('mousedown',e=>{dragging=true;autoRot=false;lastX=e.clientX;lastY=e.clientY;});
+window.addEventListener('mouseup',()=>dragging=false);
+window.addEventListener('mousemove',e=>{
+  if(dragging){
+    rotY+=(e.clientX-lastX)*.007; rotX+=(e.clientY-lastY)*.007;
+    rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX));
+    lastX=e.clientX; lastY=e.clientY;
+  }
+  const mouse=new THREE.Vector2((e.clientX/window.innerWidth)*2-1,-(e.clientY/window.innerHeight)*2+1);
+  const ray=new THREE.Raycaster(); ray.setFromCamera(mouse,camera);
+  const hits=ray.intersectObjects(meshes);
+  const tt=document.getElementById('tooltip');
+  if(hits.length){
+    const n=hits[0].object.userData;
+    document.getElementById('tt-name').textContent=n.id;
+    document.getElementById('tt-layer').textContent=n.layer.toUpperCase()+' · '+n.desc;
+    document.getElementById('tt-deps').textContent=n.deps?'→ '+n.deps:'';
+    tt.style.display='block';
+    tt.style.left=(e.clientX+16)+'px';
+    tt.style.top=(e.clientY-10)+'px';
+    meshes.forEach(m=>m.material.emissiveIntensity=.04);
+    hits[0].object.material.emissiveIntensity=.55;
+  } else {
+    tt.style.display='none';
+    meshes.forEach(m=>m.material.emissiveIntensity=.12);
+  }
+});
+canvas.addEventListener('wheel',e=>{
+  camera.position.z=Math.max(200,Math.min(1100,camera.position.z+e.deltaY*.5));
+});
+canvas.addEventListener('touchstart',e=>{dragging=true;autoRot=false;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;});
+canvas.addEventListener('touchend',()=>dragging=false);
+canvas.addEventListener('touchmove',e=>{
+  if(!dragging)return;
+  rotY+=(e.touches[0].clientX-lastX)*.007; rotX+=(e.touches[0].clientY-lastY)*.007;
+  lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+});
 
-    let dragging = false, lastX = 0, lastY = 0;
-    let rotX = 0.2, rotY = 0;
-    let autoRotate = true;
+window.switchGraph=function(gi){
+  curGraph=gi;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===gi));
+  rotX=0.15; rotY=0; autoRot=true;
+  buildGraph(gi);
+};
 
-    canvas.addEventListener('mousedown', e => { dragging = true; autoRotate = false; lastX = e.clientX; lastY = e.clientY; });
-    window.addEventListener('mouseup', () => { dragging = false; });
-    window.addEventListener('mousemove', e => {
-        if (!dragging) return;
-        rotY += (e.clientX - lastX) * 0.007;
-        rotX += (e.clientY - lastY) * 0.007;
-        rotX = Math.max(-Math.PI/2, Math.min(Math.PI/2, rotX));
-        lastX = e.clientX; lastY = e.clientY;
-    });
+const tmpV=new THREE.Vector3();
+function toScreen(wp){
+  tmpV.copy(wp); tmpV.project(camera);
+  return{x:(tmpV.x+1)/2*window.innerWidth,y:(-tmpV.y+1)/2*window.innerHeight};
+}
 
-    canvas.addEventListener('touchstart', e => { dragging = true; autoRotate = false; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; });
-    canvas.addEventListener('touchend', () => dragging = false);
-    canvas.addEventListener('touchmove', e => {
-        if (!dragging) return;
-        rotY += (e.touches[0].clientX - lastX) * 0.007;
-        rotX += (e.touches[0].clientY - lastY) * 0.007;
-        rotX = Math.max(-Math.PI/2, Math.min(Math.PI/2, rotX));
-        lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
-    });
+let t=0;
+function animate(){
+  requestAnimationFrame(animate); t+=.004;
+  if(autoRot) rotY+=.003;
+  group.rotation.x=rotX; group.rotation.y=rotY;
+  group.position.y=Math.sin(t)*3;
+  meshes.forEach((m,i)=>{
+    const wp=m.getWorldPosition(new THREE.Vector3());
+    const s=toScreen(wp);
+    const el=labelEls[i]; if(!el)return;
+    el.style.left=s.x+'px';
+    el.style.top=(s.y+GRAPHS[curGraph].nodes[i].size+12)+'px';
+    const zn=(wp.z+600)/1200;
+    el.style.opacity=Math.max(.05,Math.min(.9,zn));
+  });
+  renderer.render(scene,camera);
+}
 
-    canvas.addEventListener('wheel', e => {
-        camera.position.z = Math.max(200, Math.min(900, camera.position.z + e.deltaY * 0.5));
-    });
+buildGraph(0);
+animate();
 
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-    const tooltip = document.getElementById('tooltip');
-    let hoveredMesh = null;
-
-    window.addEventListener('mousemove', e => {
-        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
-        raycaster.setFromCamera(mouse, camera);
-        const hits = raycaster.intersectObjects(meshes);
-
-        if (hits.length > 0) {
-            const mesh = hits[0].object;
-            const n = mesh.userData;
-            hoveredMesh = mesh;
-            document.getElementById('tt-name').textContent = n.id;
-            document.getElementById('tt-group').textContent = n.group.toUpperCase();
-            document.getElementById('tt-conn').textContent = connCount[n.index] + ' connections';
-            tooltip.style.display = 'block';
-            tooltip.style.left = (e.clientX + 16) + 'px';
-            tooltip.style.top  = (e.clientY - 10) + 'px';
-
-            meshes.forEach(m => { m.material.emissiveIntensity = 0.05; });
-            mesh.material.emissiveIntensity = 0.5;
-        } else {
-            hoveredMesh = null;
-            tooltip.style.display = 'none';
-            meshes.forEach(m => { m.material.emissiveIntensity = 0.15; });
-        }
-    });
-
-    const tmpV = new THREE.Vector3();
-    function toScreen(worldPos) {
-        tmpV.copy(worldPos);
-        tmpV.project(camera);
-        return {
-            x: (tmpV.x + 1) / 2 * window.innerWidth,
-            y: (-tmpV.y + 1) / 2 * window.innerHeight
-        };
-    }
-
-    let t = 0;
-    function animate() {
-        requestAnimationFrame(animate);
-        t += 0.005;
-
-        if (autoRotate) rotY += 0.003;
-
-        group.rotation.x = rotX;
-        group.rotation.y = rotY;
-
-        group.position.y = Math.sin(t) * 4;
-
-        meshes.forEach((m, i) => {
-            const wpos = m.getWorldPosition(new THREE.Vector3());
-            const s = toScreen(wpos);
-            const el = labelEls[i];
-            el.style.left = s.x + 'px';
-            el.style.top  = (s.y + NODES[i].size + 14) + 'px';
-            const zN = (wpos.z + 500) / 1000;
-            el.style.opacity = Math.max(0.1, Math.min(0.9, zN));
-        });
-
-        renderer.render(scene, camera);
-    }
-    animate();
-
-    window.addEventListener('resize', () => {
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-    });
+window.addEventListener('resize',()=>{
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+});
 </script>
 </body>
 </html>
