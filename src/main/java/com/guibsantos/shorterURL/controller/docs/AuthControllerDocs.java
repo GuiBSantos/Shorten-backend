@@ -4,6 +4,7 @@ import com.guibsantos.shorterURL.controller.dto.request.*;
 import com.guibsantos.shorterURL.controller.dto.response.CheckAvailabilityResponse;
 import com.guibsantos.shorterURL.controller.dto.response.GoogleLoginResponse;
 import com.guibsantos.shorterURL.controller.dto.response.LoginResponse;
+import com.guibsantos.shorterURL.controller.dto.response.MessageResponse;
 import com.guibsantos.shorterURL.controller.dto.response.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,11 +28,12 @@ public interface AuthControllerDocs {
             description = "Cria uma nova conta de usuário no sistema com senha criptografada."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Usuário registrado com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Usuário registrado com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))),
             @ApiResponse(responseCode = "400", description = "Erro de validação (Username ou Email já existem)"),
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     })
-    ResponseEntity<String> register(
+    ResponseEntity<MessageResponse> register(
             @Parameter(description = "JSON contendo username, email e senha", required = true)
             @RequestBody @Valid RegisterRequest request
     );
@@ -88,12 +90,13 @@ public interface AuthControllerDocs {
     )
     @SecurityRequirement(name = "bearer-key")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))),
             @ApiResponse(responseCode = "403", description = "Token inválido ou não informado"),
             @ApiResponse(responseCode = "400", description = "Senha atual incorreta ou nova senha inválida"),
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
-    ResponseEntity<Void> changePassword(
+    ResponseEntity<MessageResponse> changePassword(
             @Parameter(description = "Objeto contendo a senha atual e a nova senha", required = true)
             @RequestBody @Valid ChangePasswordRequest request
     );
@@ -104,11 +107,12 @@ public interface AuthControllerDocs {
             description = "Envia um e-mail com um código de 6 dígitos para o usuário, caso o e-mail esteja cadastrado."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Se o e-mail existir, o código foi enviado"),
+            @ApiResponse(responseCode = "200", description = "Se o e-mail existir, o código foi enviado",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))),
             @ApiResponse(responseCode = "404", description = "E-mail não encontrado no sistema"),
             @ApiResponse(responseCode = "500", description = "Erro ao enviar o e-mail")
     })
-    ResponseEntity<Void> forgotPassword(
+    ResponseEntity<MessageResponse> forgotPassword(
             @Parameter(description = "JSON contendo apenas o e-mail do usuário", required = true)
             @RequestBody @Valid ForgotPasswordRequest request
     );
@@ -118,11 +122,12 @@ public interface AuthControllerDocs {
             description = "Valida o código recebido por e-mail e define a nova senha do usuário."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Senha redefinida com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Senha redefinida com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))),
             @ApiResponse(responseCode = "400", description = "Código inválido, expirado ou dados incorretos"),
             @ApiResponse(responseCode = "404", description = "E-mail não encontrado")
     })
-    ResponseEntity<Void> resetPassword(
+    ResponseEntity<MessageResponse> resetPassword(
             @Parameter(description = "JSON contendo e-mail, código recebido e nova senha", required = true)
             @RequestBody @Valid ResetPasswordRequest request
     );
@@ -132,11 +137,12 @@ public interface AuthControllerDocs {
             description = "Verifica se o código digitado está correto e não expirou, antes de permitir que o usuário digite a nova senha."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Código válido, pode prosseguir para a nova senha"),
+            @ApiResponse(responseCode = "200", description = "Código válido, pode prosseguir para a nova senha",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))),
             @ApiResponse(responseCode = "400", description = "Código incorreto ou expirado"),
             @ApiResponse(responseCode = "404", description = "E-mail não encontrado")
     })
-    ResponseEntity<Void> validateCode(
+    ResponseEntity<MessageResponse> validateCode(
             @Parameter(description = "JSON contendo e-mail e o código de 6 dígitos", required = true)
             @RequestBody @Valid ValidateCodeRequest request
     );
@@ -147,11 +153,12 @@ public interface AuthControllerDocs {
     )
     @SecurityRequirement(name = "bearer-key")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Username atualizado com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Username atualizado com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))),
             @ApiResponse(responseCode = "400", description = "Nome de usuário já existe ou inválido"),
             @ApiResponse(responseCode = "403", description = "Token inválido")
     })
-    ResponseEntity<Void> updateUsername(
+    ResponseEntity<MessageResponse> updateUsername(
             @Parameter(description = "Novo username desejado", required = true)
             @RequestBody @Valid UpdateUsernameRequest request
     );
@@ -162,11 +169,12 @@ public interface AuthControllerDocs {
     )
     @SecurityRequirement(name = "bearer-key")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Conta excluída com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Conta excluída com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))),
             @ApiResponse(responseCode = "400", description = "Senha incorreta"),
             @ApiResponse(responseCode = "403", description = "Token inválido")
     })
-    ResponseEntity<Void> deleteAccount(
+    ResponseEntity<MessageResponse> deleteAccount(
             @Parameter(description = "Senha atual para confirmação", required = true)
             @RequestBody @Valid DeleteAccountRequest request
     );

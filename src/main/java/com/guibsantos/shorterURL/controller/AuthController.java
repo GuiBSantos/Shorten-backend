@@ -5,6 +5,7 @@ import com.guibsantos.shorterURL.controller.dto.request.*;
 import com.guibsantos.shorterURL.controller.dto.response.CheckAvailabilityResponse;
 import com.guibsantos.shorterURL.controller.dto.response.GoogleLoginResponse;
 import com.guibsantos.shorterURL.controller.dto.response.LoginResponse;
+import com.guibsantos.shorterURL.controller.dto.response.MessageResponse;
 import com.guibsantos.shorterURL.controller.dto.response.UserResponse;
 import com.guibsantos.shorterURL.entity.UserEntity;
 import com.guibsantos.shorterURL.repository.UserRepository;
@@ -32,9 +33,9 @@ public class AuthController implements AuthControllerDocs {
 
     @Override
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest request) {
+    public ResponseEntity<MessageResponse> register(@RequestBody @Valid RegisterRequest request) {
         userService.registerUser(request);
-        return ResponseEntity.ok("Usuário registrado com sucesso!");
+        return ResponseEntity.ok(new MessageResponse("Usuário registrado com sucesso!"));
     }
 
     @Override
@@ -68,9 +69,9 @@ public class AuthController implements AuthControllerDocs {
 
     @Override
     @PatchMapping("/change-password")
-    public ResponseEntity<Void> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
+    public ResponseEntity<MessageResponse> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
         authService.changePassword(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new MessageResponse("Senha alterada com sucesso!"));
     }
 
     @Override
@@ -109,36 +110,36 @@ public class AuthController implements AuthControllerDocs {
 
     @Override
     @PostMapping("/forgot-password")
-    public ResponseEntity<Void> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
+    public ResponseEntity<MessageResponse> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
         authService.forgotPassword(request.email());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new MessageResponse("Código de recuperação enviado para o email, caso ele exista."));
     }
 
     @Override
     @PatchMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+    public ResponseEntity<MessageResponse> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
         authService.resetPassword(request.email(), request.code(), request.newPassword());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new MessageResponse("Senha redefinida com sucesso!"));
     }
 
     @Override
     @PostMapping("/validate-code")
-    public ResponseEntity<Void> validateCode(@RequestBody @Valid ValidateCodeRequest request) {
+    public ResponseEntity<MessageResponse> validateCode(@RequestBody @Valid ValidateCodeRequest request) {
         authService.validateRecoveryCode(request.email(), request.code());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new MessageResponse("Código válido."));
     }
 
     @Override
     @PatchMapping("/update-username")
-    public ResponseEntity<Void> updateUsername(@RequestBody @Valid UpdateUsernameRequest request) {
+    public ResponseEntity<MessageResponse> updateUsername(@RequestBody @Valid UpdateUsernameRequest request) {
         authService.updateUsername(request.newUsername());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new MessageResponse("Username atualizado com sucesso!"));
     }
 
     @Override
     @DeleteMapping("/delete-account")
-    public ResponseEntity<Void> deleteAccount(@RequestBody @Valid DeleteAccountRequest request) {
+    public ResponseEntity<MessageResponse> deleteAccount(@RequestBody @Valid DeleteAccountRequest request) {
         authService.deleteAccount(request.password());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new MessageResponse("Conta excluída com sucesso!"));
     }
 }
