@@ -1,4 +1,4 @@
-#  High Performance URL Shortener API
+# Shorten Backend
 
 ![Java](https://img.shields.io/badge/Java-21-orange)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3-green)
@@ -9,50 +9,115 @@
 ![Terraform](https://img.shields.io/badge/Terraform-IaC-7B42BC)
 ![Ansible](https://img.shields.io/badge/Ansible-Config-EE0000)
 
-API de encurtamento de URLs focada em **alta performance**, **escalabilidade** e **deploy automatizado**. O projeto utiliza uma arquitetura híbrida de Cache-Aside com Redis para garantir latência mínima (< 10ms) e infraestrutura como código (IaC) para provisionamento na AWS.
+API REST para encurtamento de URLs com autenticação, URLs personalizadas, analytics em tempo real e deploy automatizado na AWS.
 
-##  Arquitetura & Design
+> 🔭 [Visualizar arquitetura interativa](https://guibsantos.github.io/Shorten-backend/)
 
-O sistema foi desenhado para suportar alta carga de leitura e escrita:
+---
 
-* **Cache Strategy (Redis):** Implementação de *Cache-Aside*. URLs requisitadas ficam em memória. Leituras subsequentes não tocam no banco de dados.
-* **Async Processing:** A contagem de acessos (Analytics) é processada de forma assíncrona para não bloquear a thread principal de requisição.
-* **Docker Multi-Stage Build:** Imagens otimizadas (< 200MB) usando JRE Alpine.
-* **Infrastructure as Code (IaC):**
-    * **Terraform:** Provisiona a VPC, Security Groups e Instância EC2 na AWS.
-    * **Ansible:** Configura o servidor, instala Docker e faz o deploy da aplicação automaticamente.
+## ✨ Funcionalidades
 
-##  Tech Stack
+- 🔗 Encurtamento com slugs personalizados
+- 👤 Autenticação via JWT e Google OAuth
+- 📊 Analytics de acessos em tempo real
+- 📧 Notificações por e-mail assíncronas (RabbitMQ)
+- ⚡ Cache de alta performance com Redis (Cache-Aside)
+- 🛡️ Rate limiting por IP
+- 🖼️ Upload de foto de perfil
+- 🌐 Deploy automatizado em domínio próprio
 
-* **Core:** Java 21, Spring Boot 3
-* **Dados:** PostgreSQL 16, Redis 7 (Alpine)
-* **DevOps:** Docker, Docker Compose, Terraform, Ansible, AWS (EC2)
-* **Doc:** Swagger / OpenAPI
+---
 
-##  Como Rodar (Localmente)
+## 🏗️ Arquitetura
 
-O projeto é "Zero Config" com Docker.
+| Camada | Tecnologia |
+|---|---|
+| API | Java 21, Spring Boot 3 |
+| Banco de dados | PostgreSQL 16 + Flyway |
+| Cache | Redis 7 (Cache-Aside) |
+| Mensageria | RabbitMQ |
+| Auth | Spring Security + JWT + Google OAuth |
+| DevOps | Docker, Terraform, Ansible, AWS EC2 |
+| Documentação | Swagger / OpenAPI |
+| Load test | k6 |
 
-1.  **Clone e suba a aplicação:**
-    ```bash
-    git clone [https://github.com/GuiBSantos/high-performance-url-shortener.git](https://github.com/GuiBSantos/high-performance-url-shortener.git)
-    cd high-performance-url-shortener
-    docker-compose up --build
-    ```
+---
 
-2.  **Acesse a Documentação:**
-     [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
-
-##  Como Rodar (Deploy na AWS)
-
-Este projeto contém automação completa de infraestrutura.
+## 🚀 Rodando localmente
 
 ### Pré-requisitos
-* Conta na AWS e AWS CLI configurado.
-* Terraform e Docker instalados localmente.
+- Docker e Docker Compose
+- Arquivo `.env` configurado (veja `.env.example`)
+```bash
+git clone https://github.com/GuiBSantos/Shorten-backend.git
+cd Shorten-backend
+cp .env.example .env
+docker compose up --build
+```
 
-### 1. Provisionar Infraestrutura (Terraform)
+Documentação disponível em:
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+---
+
+## ☁️ Deploy na AWS
+
+### 1. Provisionar infraestrutura (Terraform)
 ```bash
 cd infra/terraform
 terraform init
 terraform apply -auto-approve
+```
+
+### 2. Configurar servidor (Ansible)
+```bash
+cd infra/ansible
+ansible-playbook -i hosts playbook.yml
+```
+
+---
+
+## 📁 Variáveis de Ambiente
+
+Crie um `.env` baseado no `.env.example`:
+```env
+# Postgres
+POSTGRES_USERNAME=
+POSTGRES_PASSWORD=
+POSTGRES_DB=
+
+# Redis
+REDIS_PASSWORD=
+
+# RabbitMQ
+SPRING_RABBITMQ_USERNAME=
+SPRING_RABBITMQ_PASSWORD=
+
+# Google OAuth
+TOKEN=
+GOOGLE_ID=
+
+# Mail
+MAIL_USER=
+MAIL_PASSWORD=
+```
+
+---
+
+## 📦 Estrutura
+```
+src/main/java/com/guibsantos/shorterURL/
+├── config/          # RabbitMQ, Redis, Swagger, WebMvc
+├── controller/      # Auth, Url, User + docs Swagger
+├── dto/             # Request e Response objects
+├── email/           # EmailConsumer, EmailProducer
+├── entity/          # UrlEntity, UserEntity, Role
+├── exception/       # GlobalExceptionHandler
+├── job/             # CleanupJob (URLs expiradas)
+├── repository/      # UrlRepository, UserRepository
+├── security/        # SecurityConfig, SecurityFilter, TokenService
+│   └── filter/      # RateLimitFilter
+└── service/         # AuthService, UrlService, UserService...
+```
